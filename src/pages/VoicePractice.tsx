@@ -1,44 +1,27 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Mic, Volume2, Sparkles, ArrowLeft } from "lucide-react";
+import { Mic, Volume2, Sparkles, ArrowLeft, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useVoiceChat } from "@/hooks/useVoiceChat";
+import { useEffect, useRef } from "react";
 
 const VoicePractice = () => {
-  const [isListening, setIsListening] = useState(false);
-  const [messages, setMessages] = useState([
-    {
-      type: "ai",
-      english: "Hello! I'm your AI English teacher. Let's practice speaking today. Tell me about yourself!",
-      telugu: "నమస్కారం! నేను మీ AI ఇంగ్లీష్ టీచర్. ఈరోజు మాట్లాడటం ప్రాక్టీస్ చేద్దాం. మీ గురించి చెప్పండి!"
-    }
-  ]);
+  const {
+    messages,
+    isListening,
+    isProcessing,
+    isSpeaking,
+    startListening,
+    stopListening,
+    clearMessages,
+  } = useVoiceChat();
+  
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const toggleListening = () => {
-    setIsListening(!isListening);
-    
-    if (!isListening) {
-      // Simulate adding a user message after 2 seconds
-      setTimeout(() => {
-        setMessages(prev => [...prev, {
-          type: "user",
-          english: "My name is Ravi. I want to learn English.",
-          telugu: ""
-        }]);
-        setIsListening(false);
-        
-        // AI response after 1 second
-        setTimeout(() => {
-          setMessages(prev => [...prev, {
-            type: "ai",
-            english: "Nice to meet you, Ravi! That's wonderful. What do you want to learn English for?",
-            telugu: "మిమ్మల్ని కలవడం ఆనందంగా ఉంది, రవి! చాలా బాగుంది. మీరు ఇంగ్లీష్ ఎందుకు నేర్చుకోవాలనుకుంటున్నారు?"
-          }]);
-        }, 1000);
-      }, 2000);
-    }
-  };
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
@@ -53,10 +36,15 @@ const VoicePractice = () => {
           </Link>
           <Badge variant="secondary" className="gradient-hero text-white">
             <Sparkles className="w-3 h-3 mr-1" />
-            Voice Practice
+            AI Voice Practice
           </Badge>
-          <Button variant="ghost" size="sm">
-            <Volume2 className="w-4 h-4" />
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={clearMessages}
+            disabled={messages.length === 0}
+          >
+            <Trash2 className="w-4 h-4" />
           </Button>
         </div>
       </header>
@@ -64,6 +52,21 @@ const VoicePractice = () => {
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Conversation Area */}
         <div className="mb-8 space-y-4 min-h-[400px] max-h-[500px] overflow-y-auto">
+          {messages.length === 0 && (
+            <div className="flex items-center justify-center h-full">
+              <Card className="p-8 text-center max-w-md">
+                <Sparkles className="w-12 h-12 mx-auto mb-4 text-primary" />
+                <h3 className="text-xl font-semibold mb-2">Ready to Practice!</h3>
+                <p className="text-muted-foreground mb-1">
+                  Click the microphone and start speaking in English
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  మైక్రోఫోన్ క్లిక్ చేసి ఇంగ్లీష్‌లో మాట్లాడండి
+                </p>
+              </Card>
+            </div>
+          )}
+          
           {messages.map((message, index) => (
             <div
               key={index}
@@ -74,15 +77,11 @@ const VoicePractice = () => {
                   ? "bg-primary text-primary-foreground" 
                   : "bg-card"
               }`}>
-                <p className="font-medium mb-2">{message.english}</p>
-                {message.telugu && (
-                  <p className="text-sm opacity-80 border-t pt-2 mt-2">
-                    {message.telugu}
-                  </p>
-                )}
+                <p className="whitespace-pre-wrap">{message.text}</p>
               </Card>
             </div>
           ))}
+          <div ref={messagesEndRef} />
         </div>
 
         {/* Voice Control */}
@@ -99,12 +98,13 @@ const VoicePractice = () => {
             {/* Microphone button */}
             <Button
               size="lg"
-              onClick={toggleListening}
+              onClick={isListening ? stopListening : startListening}
+              disabled={isProcessing || isSpeaking}
               className={`relative w-24 h-24 rounded-full ${
                 isListening 
                   ? "gradient-accent shadow-glow" 
                   : "gradient-hero shadow-lg"
-              } hover:scale-110 transition-transform`}
+              } hover:scale-110 transition-transform disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               <Mic className="w-10 h-10 text-white" />
             </Button>
@@ -112,10 +112,22 @@ const VoicePractice = () => {
 
           <div className="text-center">
             <p className="text-lg font-semibold mb-1">
-              {isListening ? "Listening..." : "Tap to speak"}
+              {isListening 
+                ? "Listening..." 
+                : isProcessing 
+                ? "Processing..." 
+                : isSpeaking 
+                ? "Speaking..." 
+                : "Tap to speak"}
             </p>
             <p className="text-sm text-muted-foreground">
-              {isListening ? "మాట్లాడండి..." : "మాట్లాడటానికి టాప్ చేయండి"}
+              {isListening 
+                ? "మాట్లాడండి..." 
+                : isProcessing 
+                ? "ప్రాసెస్ చేస్తోంది..." 
+                : isSpeaking 
+                ? "మాట్లాడుతోంది..." 
+                : "మాట్లాడటానికి టాప్ చేయండి"}
             </p>
           </div>
 
