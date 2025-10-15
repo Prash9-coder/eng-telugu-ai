@@ -9,6 +9,7 @@ import Assessment from "./pages/Assessment";
 import Lessons from "./pages/Lessons";
 import Progress from "./pages/Progress";
 import Vocabulary from "./pages/Vocabulary";
+import DailySentences from "./pages/DailySentences";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/lessons" element={<Lessons />} />
           <Route path="/progress" element={<Progress />} />
           <Route path="/vocabulary" element={<Vocabulary />} />
+          <Route path="/daily-sentences" element={<DailySentences />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

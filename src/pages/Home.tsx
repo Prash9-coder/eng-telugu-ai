@@ -159,6 +159,34 @@ const Home = () => {
                 </div>
               </Card>
             </Link>
+
+            <Link to="/daily-sentences">
+              <Card className="p-6 hover:shadow-glow hover:border-accent transition-all cursor-pointer group">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-2xl gradient-accent flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <BookOpen className="w-8 h-8 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-lg mb-1">Daily Sentences</h4>
+                    <p className="text-sm text-muted-foreground">Practice everyday phrases</p>
+                  </div>
+                </div>
+              </Card>
+            </Link>
+
+            <Link to="/vocabulary">
+              <Card className="p-6 hover:shadow-glow hover:border-primary transition-all cursor-pointer group">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-2xl gradient-hero flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <BookOpen className="w-8 h-8 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-lg mb-1">Vocabulary</h4>
+                    <p className="text-sm text-muted-foreground">Browse and learn words</p>
+                  </div>
+                </div>
+              </Card>
+            </Link>
           </div>
         </div>
       </section>

@@ -50,8 +50,16 @@ const Lessons = () => {
 
   const playAudio = (text: string) => {
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-US';
-    utterance.rate = 0.9;
+    utterance.lang = 'en-IN';
+    utterance.rate = 0.85;
+    utterance.pitch = 1.1;
+    
+    const voices = window.speechSynthesis.getVoices();
+    const femaleVoice = voices.find(voice => 
+      voice.lang.startsWith('en') && voice.name.toLowerCase().includes('female')
+    );
+    if (femaleVoice) utterance.voice = femaleVoice;
+    
     window.speechSynthesis.speak(utterance);
   };
 

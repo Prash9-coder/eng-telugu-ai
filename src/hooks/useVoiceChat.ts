@@ -20,10 +20,25 @@ export const useVoiceChat = () => {
       setIsSpeaking(true);
       window.speechSynthesis.cancel();
       
-      const utterance = new SpeechSynthesisUtterance(text);
+      // Clean up any markdown symbols
+      const cleanText = text.replace(/\*\*/g, '');
+      
+      const utterance = new SpeechSynthesisUtterance(cleanText);
       utterance.lang = 'en-IN';
-      utterance.rate = 0.9;
-      utterance.pitch = 1;
+      utterance.rate = 0.85; // Slower, clearer speech
+      utterance.pitch = 1.1; // Slightly higher, friendlier pitch
+      
+      // Try to find a female voice for a sweeter tone
+      const voices = window.speechSynthesis.getVoices();
+      const femaleVoice = voices.find(voice => 
+        voice.lang.startsWith('en') && voice.name.toLowerCase().includes('female')
+      ) || voices.find(voice => 
+        voice.lang.startsWith('en') && (voice.name.includes('Samantha') || voice.name.includes('Victoria'))
+      ) || voices.find(voice => voice.lang.startsWith('en-IN'));
+      
+      if (femaleVoice) {
+        utterance.voice = femaleVoice;
+      }
       
       utterance.onend = () => {
         setIsSpeaking(false);
@@ -47,6 +62,10 @@ export const useVoiceChat = () => {
     try {
       abortControllerRef.current = new AbortController();
       
+      // Get user profile data for personalization (optional - defaults will be used if not available)
+      const userLevel = localStorage.getItem('userLevel') || 'beginner';
+      const recentMistakes = JSON.parse(localStorage.getItem('recentMistakes') || '[]').slice(0, 5);
+      
       const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
       const response = await fetch(CHAT_URL, {
         method: 'POST',
@@ -59,6 +78,8 @@ export const useVoiceChat = () => {
             role: m.type === 'user' ? 'user' : 'assistant',
             content: m.text,
           })),
+          userLevel,
+          recentMistakes,
         }),
         signal: abortControllerRef.current.signal,
       });
@@ -122,11 +143,15 @@ export const useVoiceChat = () => {
       }
 
       if (aiResponseText) {
-        const englishPart = aiResponseText.match(/\*\*English:\*\*\s*([^\*]+)/)?.[1]?.trim();
+        // Clean up the text by removing ** symbols
+        const cleanedText = aiResponseText.replace(/\*\*/g, '');
+        
+        // Extract English part (without ** symbols)
+        const englishPart = cleanedText.match(/English:\s*([^\n]+)/)?.[1]?.trim();
         if (englishPart) {
           speak(englishPart);
         } else {
-          speak(aiResponseText);
+          speak(cleanedText);
         }
       }
 

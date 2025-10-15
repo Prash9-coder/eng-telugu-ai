@@ -14,7 +14,209 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      daily_sentences: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          date: string | null
+          english: string
+          id: string
+          level: string | null
+          telugu: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          date?: string | null
+          english: string
+          id?: string
+          level?: string | null
+          telugu: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          date?: string | null
+          english?: string
+          id?: string
+          level?: string | null
+          telugu?: string
+        }
+        Relationships: []
+      }
+      lessons: {
+        Row: {
+          completed: boolean | null
+          content: Json
+          created_at: string | null
+          id: string
+          level: string | null
+          title: string
+          user_id: string | null
+        }
+        Insert: {
+          completed?: boolean | null
+          content: Json
+          created_at?: string | null
+          id?: string
+          level?: string | null
+          title: string
+          user_id?: string | null
+        }
+        Update: {
+          completed?: boolean | null
+          content?: Json
+          created_at?: string | null
+          id?: string
+          level?: string | null
+          title?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_mistakes: {
+        Row: {
+          corrected_text: string | null
+          created_at: string | null
+          explanation: string | null
+          frequency: number | null
+          id: string
+          mistake_type: string | null
+          original_text: string | null
+          user_id: string | null
+        }
+        Insert: {
+          corrected_text?: string | null
+          created_at?: string | null
+          explanation?: string | null
+          frequency?: number | null
+          id?: string
+          mistake_type?: string | null
+          original_text?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          corrected_text?: string | null
+          created_at?: string | null
+          explanation?: string | null
+          frequency?: number | null
+          id?: string
+          mistake_type?: string | null
+          original_text?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_profiles: {
+        Row: {
+          created_at: string | null
+          id: string
+          last_practice_date: string | null
+          level: string | null
+          streak_days: number | null
+          total_practice_time: number | null
+          total_words_learned: number | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          last_practice_date?: string | null
+          level?: string | null
+          streak_days?: number | null
+          total_practice_time?: number | null
+          total_words_learned?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          last_practice_date?: string | null
+          level?: string | null
+          streak_days?: number | null
+          total_practice_time?: number | null
+          total_words_learned?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_vocabulary: {
+        Row: {
+          created_at: string | null
+          favorite: boolean | null
+          id: string
+          last_practiced: string | null
+          learned: boolean | null
+          practice_count: number | null
+          user_id: string | null
+          vocabulary_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          favorite?: boolean | null
+          id?: string
+          last_practiced?: string | null
+          learned?: boolean | null
+          practice_count?: number | null
+          user_id?: string | null
+          vocabulary_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          favorite?: boolean | null
+          id?: string
+          last_practiced?: string | null
+          learned?: boolean | null
+          practice_count?: number | null
+          user_id?: string | null
+          vocabulary_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_vocabulary_vocabulary_id_fkey"
+            columns: ["vocabulary_id"]
+            isOneToOne: false
+            referencedRelation: "vocabulary"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vocabulary: {
+        Row: {
+          created_at: string | null
+          english: string
+          examples: Json | null
+          id: string
+          level: string | null
+          part_of_speech: string | null
+          pronunciation: string | null
+          telugu: string
+        }
+        Insert: {
+          created_at?: string | null
+          english: string
+          examples?: Json | null
+          id?: string
+          level?: string | null
+          part_of_speech?: string | null
+          pronunciation?: string | null
+          telugu: string
+        }
+        Update: {
+          created_at?: string | null
+          english?: string
+          examples?: Json | null
+          id?: string
+          level?: string | null
+          part_of_speech?: string | null
+          pronunciation?: string | null
+          telugu?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

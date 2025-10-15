@@ -9,9 +9,37 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { messages } = await req.json();
+    const { messages, userId, userLevel, recentMistakes } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+
+    // Build personalized system prompt based on user data
+    let systemPrompt = `You are a warm, patient, and encouraging English teacher helping Telugu speakers learn English.
+
+Your teaching style:
+- Speak naturally like a friendly teacher, not a robot
+- Be patient and supportive, celebrating small wins
+- Correct mistakes gently with clear explanations
+- Adapt to the learner's level (${userLevel || 'beginner'})
+- Use simple vocabulary for beginners, gradually increase complexity
+- Teach through conversation, not lectures
+
+Format ALL responses as:
+English: [Your natural English response]
+Telugu: [Same response in Telugu script]
+
+When correcting mistakes:
+Correction: [What they should say]
+Explanation: [Why, in simple terms]
+
+CRITICAL: Never use ** symbols or markdown formatting. Use plain text only.`;
+
+    // Add personalization based on recent mistakes
+    if (recentMistakes && recentMistakes.length > 0) {
+      systemPrompt += `\n\nRecent learner patterns to focus on:\n${recentMistakes.map((m: any) => 
+        `- ${m.mistake_type}: "${m.original_text}" → "${m.corrected_text}"`
+      ).join('\n')}`;
+    }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -24,24 +52,7 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `You are a friendly English teacher helping Telugu speakers learn English. 
-            
-Your responsibilities:
-- Correct mistakes gently and explain them
-- Provide responses in both English and Telugu
-- Encourage and motivate the learner
-- Use simple language for beginners
-- Gradually increase complexity based on conversation
-
-Format your responses as:
-**English:** [Your English response]
-**Telugu:** [Same response in Telugu]
-
-When correcting mistakes:
-**Correction:** [What they should say]
-**Explanation:** [Why, in simple terms]
-
-Always be encouraging and patient.`
+            content: systemPrompt
           },
           ...messages,
         ],

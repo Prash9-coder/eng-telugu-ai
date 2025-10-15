@@ -1,73 +1,59 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, Search, Volume2, Heart, BookOpen } from "lucide-react";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
-const vocabularyData = [
-  {
-    id: 1,
-    english: "Hello",
-    telugu: "హలో / నమస్కారం",
-    level: "Beginner",
-    learned: true,
-    favorite: true,
-    examples: ["Hello! How are you?", "Hello, nice to meet you."]
-  },
-  {
-    id: 2,
-    english: "Thank you",
-    telugu: "ధన్యవాదాలు",
-    level: "Beginner",
-    learned: true,
-    favorite: false,
-    examples: ["Thank you for your help!", "Thank you very much."]
-  },
-  {
-    id: 3,
-    english: "Friend",
-    telugu: "స్నేహితుడు",
-    level: "Beginner",
-    learned: true,
-    favorite: true,
-    examples: ["He is my friend.", "I have many friends."]
-  },
-  {
-    id: 4,
-    english: "Beautiful",
-    telugu: "అందమైన",
-    level: "Intermediate",
-    learned: false,
-    favorite: false,
-    examples: ["What a beautiful day!", "She has a beautiful smile."]
-  },
-  {
-    id: 5,
-    english: "Important",
-    telugu: "ముఖ్యమైన",
-    level: "Intermediate",
-    learned: false,
-    favorite: false,
-    examples: ["This is very important.", "Education is important."]
-  },
-  {
-    id: 6,
-    english: "Understand",
-    telugu: "అర్థం చేసుకోవడం",
-    level: "Beginner",
-    learned: true,
-    favorite: false,
-    examples: ["I understand the lesson.", "Do you understand?"]
-  }
-];
+interface VocabWord {
+  id: string;
+  english: string;
+  telugu: string;
+  pronunciation: string;
+  part_of_speech: string;
+  level: string;
+  examples: string[];
+  learned?: boolean;
+  favorite?: boolean;
+}
 
 const Vocabulary = () => {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "learned" | "favorites">("all");
+  const [vocabulary, setVocabulary] = useState<VocabWord[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredWords = vocabularyData.filter(word => {
+  useEffect(() => {
+    fetchVocabulary();
+  }, []);
+
+  const fetchVocabulary = async () => {
+    const { data, error } = await supabase
+      .from('vocabulary')
+      .select('*')
+      .order('level', { ascending: true });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load vocabulary",
+        variant: "destructive",
+      });
+    } else {
+      const formatted = (data || []).map(item => ({
+        ...item,
+        examples: Array.isArray(item.examples) ? item.examples : 
+                  typeof item.examples === 'string' ? JSON.parse(item.examples) : []
+      }));
+      setVocabulary(formatted);
+    }
+    setLoading(false);
+  };
+
+  const filteredWords = vocabulary.filter(word => {
     const matchesSearch = word.english.toLowerCase().includes(search.toLowerCase()) ||
                          word.telugu.includes(search);
     const matchesFilter = 
@@ -78,12 +64,37 @@ const Vocabulary = () => {
     return matchesSearch && matchesFilter;
   });
 
+  const toggleFavorite = async (wordId: string) => {
+    const word = vocabulary.find(w => w.id === wordId);
+    if (!word) return;
+
+    const newFavorite = !word.favorite;
+    setVocabulary(prev => prev.map(w => 
+      w.id === wordId ? { ...w, favorite: newFavorite } : w
+    ));
+
+    // In a full implementation, save to database
+    localStorage.setItem(`vocab_favorite_${wordId}`, String(newFavorite));
+  };
+
   const playAudio = (text: string) => {
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-US';
-    utterance.rate = 0.9;
+    utterance.lang = 'en-IN';
+    utterance.rate = 0.85;
+    utterance.pitch = 1.1;
+    
+    const voices = window.speechSynthesis.getVoices();
+    const femaleVoice = voices.find(voice => 
+      voice.lang.startsWith('en') && voice.name.toLowerCase().includes('female')
+    );
+    if (femaleVoice) utterance.voice = femaleVoice;
+    
     window.speechSynthesis.speak(utterance);
   };
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
@@ -152,19 +163,30 @@ const Vocabulary = () => {
           {filteredWords.map((word) => (
             <Card key={word.id} className="p-5 hover:shadow-lg transition-all group">
               <div className="flex items-start justify-between mb-3">
-                <Badge variant={word.learned ? "secondary" : "outline"} className="text-xs">
-                  {word.level}
-                </Badge>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <div className="space-y-1">
+                  <Badge variant={word.learned ? "secondary" : "outline"} className="text-xs">
+                    {word.level}
+                  </Badge>
+                  <Badge variant="outline" className="text-xs ml-2 capitalize">
+                    {word.part_of_speech}
+                  </Badge>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 w-8 p-0"
+                  onClick={() => toggleFavorite(word.id)}
+                >
                   <Heart className={`w-4 h-4 ${word.favorite ? "fill-red-500 text-red-500" : ""}`} />
                 </Button>
               </div>
 
               <h3 className="text-xl font-bold mb-1">{word.english}</h3>
+              <p className="text-sm text-muted-foreground mb-1">/{word.pronunciation}/</p>
               <p className="text-lg text-muted-foreground mb-3">{word.telugu}</p>
 
               <div className="space-y-2 mb-4">
-                {word.examples.slice(0, 1).map((example, i) => (
+                {Array.isArray(word.examples) && word.examples.slice(0, 1).map((example: string, i: number) => (
                   <p key={i} className="text-sm text-muted-foreground italic">
                     "{example}"
                   </p>
@@ -194,10 +216,10 @@ const Vocabulary = () => {
         {/* Summary */}
         <Card className="p-6 mt-8 text-center">
           <div className="text-sm text-muted-foreground mb-2">
-            Showing {filteredWords.length} of {vocabularyData.length} words
+            Showing {filteredWords.length} of {vocabulary.length} words
           </div>
           <div className="text-xs text-muted-foreground">
-            {vocabularyData.filter(w => w.learned).length} words learned • {vocabularyData.filter(w => w.favorite).length} favorites
+            {vocabulary.filter(w => w.learned).length} words learned • {vocabulary.filter(w => w.favorite).length} favorites
           </div>
         </Card>
       </div>
