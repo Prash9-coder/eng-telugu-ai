@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { ArrowLeft, Search, Volume2, Heart, BookOpen } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 interface VocabWord {
   id: string;
@@ -25,6 +25,8 @@ const Vocabulary = () => {
   const [filter, setFilter] = useState<"all" | "learned" | "favorites">("all");
   const [vocabulary, setVocabulary] = useState<VocabWord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchVocabulary();
@@ -65,16 +67,39 @@ const Vocabulary = () => {
   });
 
   const toggleFavorite = async (wordId: string) => {
-    const word = vocabulary.find(w => w.id === wordId);
-    if (!word) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
 
-    const newFavorite = !word.favorite;
-    setVocabulary(prev => prev.map(w => 
-      w.id === wordId ? { ...w, favorite: newFavorite } : w
-    ));
+    const isFavorite = favorites.includes(wordId);
+    
+    if (isFavorite) {
+      setFavorites(favorites.filter((fav) => fav !== wordId));
+      await supabase
+        .from('user_vocabulary')
+        .update({ favorite: false })
+        .eq('user_id', user.id)
+        .eq('vocabulary_id', wordId);
+    } else {
+      setFavorites([...favorites, wordId]);
+      const { data: existing } = await supabase
+        .from('user_vocabulary')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('vocabulary_id', wordId)
+        .maybeSingle();
 
-    // In a full implementation, save to database
-    localStorage.setItem(`vocab_favorite_${wordId}`, String(newFavorite));
+      if (existing) {
+        await supabase
+          .from('user_vocabulary')
+          .update({ favorite: true })
+          .eq('user_id', user.id)
+          .eq('vocabulary_id', wordId);
+      } else {
+        await supabase
+          .from('user_vocabulary')
+          .insert({ user_id: user.id, vocabulary_id: wordId, favorite: true });
+      }
+    }
   };
 
   const playAudio = (text: string) => {

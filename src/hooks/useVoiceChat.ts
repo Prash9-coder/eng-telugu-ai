@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Message {
   type: 'user' | 'ai';
@@ -62,33 +63,46 @@ export const useVoiceChat = () => {
     try {
       abortControllerRef.current = new AbortController();
       
-      // Get user profile data for personalization (optional - defaults will be used if not available)
-      const userLevel = localStorage.getItem('userLevel') || 'beginner';
-      const recentMistakes = JSON.parse(localStorage.getItem('recentMistakes') || '[]').slice(0, 5);
-      
-      const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
-      const response = await fetch(CHAT_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        },
-        body: JSON.stringify({
+      // Fetch user's profile and recent mistakes from database
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
+      const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('level')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      const { data: mistakes } = await supabase
+        .from('user_mistakes')
+        .select('mistake_type, original_text, corrected_text, explanation')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      const response = await supabase.functions.invoke('chat', {
+        body: { 
           messages: [...messages, userMessage].map(m => ({
             role: m.type === 'user' ? 'user' : 'assistant',
             content: m.text,
           })),
-          userLevel,
-          recentMistakes,
-        }),
-        signal: abortControllerRef.current.signal,
+          userLevel: profile?.level || 'beginner',
+          recentMistakes: mistakes || []
+        },
       });
 
-      if (!response.ok || !response.body) {
-        throw new Error('Failed to get AI response');
+      if (response.error) {
+        throw response.error;
       }
 
-      const reader = response.body.getReader();
+      if (!response.data) {
+        throw new Error('No response data');
+      }
+
+      const reader = response.data.getReader();
+
       const decoder = new TextDecoder();
       let textBuffer = '';
       let aiResponseText = '';

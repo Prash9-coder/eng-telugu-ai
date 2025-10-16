@@ -52,7 +52,7 @@ export type Database = {
           id: string
           level: string | null
           title: string
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           completed?: boolean | null
@@ -61,7 +61,7 @@ export type Database = {
           id?: string
           level?: string | null
           title: string
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           completed?: boolean | null
@@ -70,7 +70,7 @@ export type Database = {
           id?: string
           level?: string | null
           title?: string
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -83,7 +83,7 @@ export type Database = {
           id: string
           mistake_type: string | null
           original_text: string | null
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           corrected_text?: string | null
@@ -93,7 +93,7 @@ export type Database = {
           id?: string
           mistake_type?: string | null
           original_text?: string | null
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           corrected_text?: string | null
@@ -103,7 +103,7 @@ export type Database = {
           id?: string
           mistake_type?: string | null
           original_text?: string | null
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -117,7 +117,7 @@ export type Database = {
           total_practice_time: number | null
           total_words_learned: number | null
           updated_at: string | null
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           created_at?: string | null
@@ -128,7 +128,7 @@ export type Database = {
           total_practice_time?: number | null
           total_words_learned?: number | null
           updated_at?: string | null
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           created_at?: string | null
@@ -139,7 +139,7 @@ export type Database = {
           total_practice_time?: number | null
           total_words_learned?: number | null
           updated_at?: string | null
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -151,7 +151,7 @@ export type Database = {
           last_practiced: string | null
           learned: boolean | null
           practice_count: number | null
-          user_id: string | null
+          user_id: string
           vocabulary_id: string | null
         }
         Insert: {
@@ -161,7 +161,7 @@ export type Database = {
           last_practiced?: string | null
           learned?: boolean | null
           practice_count?: number | null
-          user_id?: string | null
+          user_id: string
           vocabulary_id?: string | null
         }
         Update: {
@@ -171,7 +171,7 @@ export type Database = {
           last_practiced?: string | null
           learned?: boolean | null
           practice_count?: number | null
-          user_id?: string | null
+          user_id?: string
           vocabulary_id?: string | null
         }
         Relationships: [

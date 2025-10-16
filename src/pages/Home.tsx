@@ -1,10 +1,24 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Mic, BookOpen, TrendingUp, Globe, Zap, Award } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Mic, BookOpen, TrendingUp, Globe, Zap, Award, LogOut } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Home = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    toast({
+      title: "Signed out",
+      description: "You've been signed out successfully.",
+    });
+    navigate("/auth");
+  };
+
   return (
     <div className="min-h-screen">
       {/* Header */}
@@ -23,6 +37,10 @@ const Home = () => {
               <Award className="w-3 h-3 mr-1" />
               Beginner
             </Badge>
+            <Button onClick={handleSignOut} variant="ghost" size="sm">
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign Out
+            </Button>
           </div>
         </div>
       </header>

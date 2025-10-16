@@ -10,7 +10,9 @@ import Lessons from "./pages/Lessons";
 import Progress from "./pages/Progress";
 import Vocabulary from "./pages/Vocabulary";
 import DailySentences from "./pages/DailySentences";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -21,13 +23,14 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/voice-practice" element={<VoicePractice />} />
-          <Route path="/assessment" element={<Assessment />} />
-          <Route path="/lessons" element={<Lessons />} />
-          <Route path="/progress" element={<Progress />} />
-          <Route path="/vocabulary" element={<Vocabulary />} />
-          <Route path="/daily-sentences" element={<DailySentences />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+          <Route path="/voice-practice" element={<ProtectedRoute><VoicePractice /></ProtectedRoute>} />
+          <Route path="/assessment" element={<ProtectedRoute><Assessment /></ProtectedRoute>} />
+          <Route path="/lessons" element={<ProtectedRoute><Lessons /></ProtectedRoute>} />
+          <Route path="/progress" element={<ProtectedRoute><Progress /></ProtectedRoute>} />
+          <Route path="/vocabulary" element={<ProtectedRoute><Vocabulary /></ProtectedRoute>} />
+          <Route path="/daily-sentences" element={<ProtectedRoute><DailySentences /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
