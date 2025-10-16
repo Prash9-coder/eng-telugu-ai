@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Mic, BookOpen, TrendingUp, Globe, Zap, Award, LogOut } from "lucide-react";
+import { Mic, BookOpen, TrendingUp, Globe, Zap, Award, LogOut, Book, Sparkles } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -196,11 +196,25 @@ const Home = () => {
               <Card className="p-6 hover:shadow-glow hover:border-primary transition-all cursor-pointer group">
                 <div className="flex items-center gap-4">
                   <div className="w-16 h-16 rounded-2xl gradient-hero flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <BookOpen className="w-8 h-8 text-white" />
+                    <Sparkles className="w-8 h-8 text-white" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-lg mb-1">Vocabulary</h4>
-                    <p className="text-sm text-muted-foreground">Browse and learn words</p>
+                    <h4 className="font-semibold text-lg mb-1">Daily Vocabulary</h4>
+                    <p className="text-sm text-muted-foreground">10+ new words daily</p>
+                  </div>
+                </div>
+              </Card>
+            </Link>
+
+            <Link to="/verb-forms">
+              <Card className="p-6 hover:shadow-glow hover:border-secondary transition-all cursor-pointer group">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-2xl gradient-success flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Book className="w-8 h-8 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-lg mb-1">Verb Forms</h4>
+                    <p className="text-sm text-muted-foreground">20+ verbs to master daily</p>
                   </div>
                 </div>
               </Card>

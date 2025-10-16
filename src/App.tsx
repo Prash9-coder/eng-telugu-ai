@@ -7,6 +7,7 @@ import Home from "./pages/Home";
 import VoicePractice from "./pages/VoicePractice";
 import Assessment from "./pages/Assessment";
 import Lessons from "./pages/Lessons";
+import VerbForms from "./pages/VerbForms";
 import Progress from "./pages/Progress";
 import Vocabulary from "./pages/Vocabulary";
 import DailySentences from "./pages/DailySentences";
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/voice-practice" element={<ProtectedRoute><VoicePractice /></ProtectedRoute>} />
           <Route path="/assessment" element={<ProtectedRoute><Assessment /></ProtectedRoute>} />
           <Route path="/lessons" element={<ProtectedRoute><Lessons /></ProtectedRoute>} />
+          <Route path="/verb-forms" element={<ProtectedRoute><VerbForms /></ProtectedRoute>} />
           <Route path="/progress" element={<ProtectedRoute><Progress /></ProtectedRoute>} />
           <Route path="/vocabulary" element={<ProtectedRoute><Vocabulary /></ProtectedRoute>} />
           <Route path="/daily-sentences" element={<ProtectedRoute><DailySentences /></ProtectedRoute>} />

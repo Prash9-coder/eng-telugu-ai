@@ -44,13 +44,43 @@ export type Database = {
         }
         Relationships: []
       }
+      generated_lessons: {
+        Row: {
+          count: number | null
+          created_at: string | null
+          generation_date: string | null
+          id: string
+          lesson_type: string
+          level: string | null
+        }
+        Insert: {
+          count?: number | null
+          created_at?: string | null
+          generation_date?: string | null
+          id?: string
+          lesson_type: string
+          level?: string | null
+        }
+        Update: {
+          count?: number | null
+          created_at?: string | null
+          generation_date?: string | null
+          id?: string
+          lesson_type?: string
+          level?: string | null
+        }
+        Relationships: []
+      }
       lessons: {
         Row: {
           completed: boolean | null
           content: Json
           created_at: string | null
+          description: string | null
+          duration_minutes: number | null
           id: string
           level: string | null
+          order_index: number | null
           title: string
           user_id: string
         }
@@ -58,8 +88,11 @@ export type Database = {
           completed?: boolean | null
           content: Json
           created_at?: string | null
+          description?: string | null
+          duration_minutes?: number | null
           id?: string
           level?: string | null
+          order_index?: number | null
           title: string
           user_id: string
         }
@@ -67,8 +100,11 @@ export type Database = {
           completed?: boolean | null
           content?: Json
           created_at?: string | null
+          description?: string | null
+          duration_minutes?: number | null
           id?: string
           level?: string | null
+          order_index?: number | null
           title?: string
           user_id?: string
         }
@@ -183,6 +219,60 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      verb_forms: {
+        Row: {
+          base_form: string
+          base_form_telugu: string
+          category: string | null
+          created_at: string | null
+          date: string | null
+          example_sentence: string | null
+          example_sentence_telugu: string | null
+          future_simple: string
+          id: string
+          level: string | null
+          past_continuous: string
+          past_simple: string
+          present_continuous: string
+          present_perfect: string
+          present_simple: string
+        }
+        Insert: {
+          base_form: string
+          base_form_telugu: string
+          category?: string | null
+          created_at?: string | null
+          date?: string | null
+          example_sentence?: string | null
+          example_sentence_telugu?: string | null
+          future_simple: string
+          id?: string
+          level?: string | null
+          past_continuous: string
+          past_simple: string
+          present_continuous: string
+          present_perfect: string
+          present_simple: string
+        }
+        Update: {
+          base_form?: string
+          base_form_telugu?: string
+          category?: string | null
+          created_at?: string | null
+          date?: string | null
+          example_sentence?: string | null
+          example_sentence_telugu?: string | null
+          future_simple?: string
+          id?: string
+          level?: string | null
+          past_continuous?: string
+          past_simple?: string
+          present_continuous?: string
+          present_perfect?: string
+          present_simple?: string
+        }
+        Relationships: []
       }
       vocabulary: {
         Row: {

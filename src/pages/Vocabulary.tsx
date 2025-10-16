@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Search, Volume2, Heart, BookOpen } from "lucide-react";
+import { ArrowLeft, Search, Volume2, Heart, BookOpen, Sparkles, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -25,6 +25,7 @@ const Vocabulary = () => {
   const [filter, setFilter] = useState<"all" | "learned" | "favorites">("all");
   const [vocabulary, setVocabulary] = useState<VocabWord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
   const { toast } = useToast();
 
@@ -36,7 +37,7 @@ const Vocabulary = () => {
     const { data, error } = await supabase
       .from('vocabulary')
       .select('*')
-      .order('level', { ascending: true });
+      .order('created_at', { ascending: false });
 
     if (error) {
       toast({
@@ -53,6 +54,29 @@ const Vocabulary = () => {
       setVocabulary(formatted);
     }
     setLoading(false);
+  };
+
+  const generateVocabulary = async () => {
+    setGenerating(true);
+    
+    const { data, error } = await supabase.functions.invoke("generate-vocabulary", {
+      body: { level: "beginner", count: 10 }
+    });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to generate vocabulary",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Success!",
+        description: `Generated ${data.count} new words`,
+      });
+      fetchVocabulary();
+    }
+    setGenerating(false);
   };
 
   const filteredWords = vocabulary.filter(word => {
@@ -139,8 +163,25 @@ const Vocabulary = () => {
       </header>
 
       <div className="container mx-auto px-4 py-8 max-w-6xl">
-        <h1 className="text-3xl font-bold mb-2 text-center">Your Vocabulary</h1>
-        <p className="text-muted-foreground mb-8 text-center">మీ పదజాలం</p>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Your Vocabulary</h1>
+            <p className="text-muted-foreground">మీ పదజాలం</p>
+          </div>
+          <Button onClick={generateVocabulary} disabled={generating} variant="outline">
+            {generating ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Generating...
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-4 h-4 mr-2" />
+                Generate 10 Words
+              </>
+            )}
+          </Button>
+        </div>
 
         {/* Search and Filters */}
         <div className="mb-6 space-y-4">

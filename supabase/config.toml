@@ -2,3 +2,12 @@ project_id = "kdzidmikfhqpgykntuma"
 
 [functions.chat]
 verify_jwt = true
+
+[functions.generate-lessons]
+verify_jwt = true
+
+[functions.generate-vocabulary]
+verify_jwt = false
+
+[functions.generate-verb-forms]
+verify_jwt = false
